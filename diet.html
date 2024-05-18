@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام غذائي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 800px; margin: auto; padding: 20px; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 10px; margin-top: 20px; }
+        header { background: #4CAF50; color: #fff; padding: 10px 20px; text-align: center; border-radius: 10px 10px 0 0; }
+        nav { display: flex; justify-content: space-around; padding: 10px; background: #333; color: #fff; }
+        nav a { color: #fff; text-decoration: none; padding: 10px; }
+        nav a:hover { background: #4CAF50; }
+        .section { margin-top: 20px; }
+        h2 { background: #4CAF50; color: #fff; padding: 10px; border-radius: 5px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; display: none; }
+        th, td { padding: 10px; text-align: center; border: 1px solid #ddd; }
+        th { background: #4CAF50; color: #fff; }
+        td { background: #f9f9f9; }
+        button { background-color: #4CAF50; color: #fff; border: none; padding: 5px 10px; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <header><h1>نظام غذائي</h1></header>
+    <nav id="nav-links">
+        <!-- الروابط ستتم إضافتها بواسطة JavaScript -->
+    </nav>
+    <div class="container">
+        <div class="section">
+            <h2 onclick="toggleSection('weightLossTable')">تخسيس وزن</h2>
+            <table id="weightLossTable" class="hidden">
+                <thead>
+                    <tr>
+                        <th>اليوم</th>
+                        <th>الوجبة الأولى</th>
+                        <th>الوجبة الثانية</th>
+                        <th>الوجبة الثالثة</th>
+                        <th>سناك</th>
+                        <th>مجموع السعرات</th>
+                        <th>تحرير</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- سيتم إضافة البيانات هنا بواسطة JavaScript -->
+                </tbody>
+            </table>
+            <button onclick="saveAsPDF('weightLossTable')">حفظ كـ PDF</button>
+        </div>
+        <div class="section">
+            <h2 onclick="toggleSection('weightGainTable')">زيادة وزن</h2>
+            <table id="weightGainTable" class="hidden">
+                <thead>
+                    <tr>
+                        <th>اليوم</th>
+                        <th>الوجبة الأولى</th>
+                        <th>الوجبة الثانية</th>
+                        <th>الوجبة الثالثة</th>
+                        <th>سناك</th>
+                        <th>مجموع السعرات</th>
+                        <th>تحرير</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- سيتم إضافة البيانات هنا بواسطة JavaScript -->
+                </tbody>
+            </table>
+            <button onclick="saveAsPDF('weightGainTable')">حفظ كـ PDF</button>
+        </div>
+        <div class="section">
+            <h2 onclick="toggleSection('muscleCuttingTable')">حديد تنشيف</h2>
+            <table id="muscleCuttingTable" class="hidden">
+                <thead>
+                    <tr>
+                        <th>اليوم</th>
+                        <th>الوجبة الأولى</th>
+                        <th>الوجبة الثانية</th>
+                        <th>الوجبة الثالثة</th>
+                        <th>سناك</th>
+                        <th>مجموع السعرات</th>
+                        <th>تحرير</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- سيتم إضافة البيانات هنا بواسطة JavaScript -->
+                </tbody>
+            </table>
+            <button onclick="saveAsPDF('muscleCuttingTable')">حفظ كـ PDF</button>
+        </div>
+        <div class="section">
+            <h2 onclick="toggleSection('muscleBulkingTable')">حديد تضخيم</h2>
+            <table id="muscleBulkingTable" class="hidden">
+                <thead>
+                    <tr>
+                        <th>اليوم</th>
+                        <th>الوجبة الأولى</th>
+                        <th>الوجبة الثانية</th>
+                        <th>الوجبة الثالثة</th>
+                        <th>سناك</th>
+                        <th>مجموع السعرات</th>
+                        <th>تحرير</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- سيتم إضافة البيانات هنا بواسطة JavaScript -->
+                </tbody>
+            </table>
+            <button onclick="saveAsPDF('muscleBulkingTable')">حفظ كـ PDF</button>
+        </div>
+    </div>
+
+    <script>
+    function toggleSection(tableId) {
+        var table = document.getElementById(tableId);
+        table.style.display = (table.style.display === 'none' || table.style.display === '') ? 'table' : 'none';
+    }
+
+    function populateTable(data, tableId, isAdmin) {
+        var tableBody = document.getElementById(tableId).querySelector('tbody');
+        tableBody.innerHTML = '';
+        data.forEach((row, index) => {
+            var tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row.day}</td>
+                <td contenteditable="${isAdmin}">${row.meal1}</td>
+                <td contenteditable="${isAdmin}">${row.meal2}</td>
+                <td contenteditable="${isAdmin}">${row.meal3}</td>
+                <td contenteditable="${isAdmin}">${row.snack}</td>
+                <td>${row.calories}</td>
+                <td><button class="save-btn" onclick="saveRow('${tableId}', ${index})" ${isAdmin ? '' : 'disabled'}>حفظ</button></td>
+            `;
+            tableBody.appendChild(tr);
+        });
+    }
+
+    function saveAsPDF(tableId) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        const table = document.getElementById(tableId);
+        const rows = table.querySelectorAll("tr");
+
+        const title = document.querySelector(`h2[onclick="toggleSection('${tableId}')"`).textContent;
+        doc.text(title, 20, 20);
+
+        let y = 30;  // بدء رسم الجدول من y = 30px
+        rows.forEach((row, index) => {
+            let x = 20;  // بدء كل خلية من x = 20px
+            row.querySelectorAll("td").forEach(cell => {
+                doc.text(cell.textContent.trim(), x, y);
+                x += 40;  // زيادة x بمقدار 40px لكل خلية
+            });
+            y += 10;  // الانتقال للسطر التالي
+        });
+
+        doc.save(`${title}.pdf`);  // حفظ الملف بعنوان الجدول
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var role = localStorage.getItem('role');
+        var isAdmin = (role === 'admin');  // تعريف isAdmin
+
+        var navLinks = document.getElementById('nav-links');
+        var links = `
+        <a href="main.html">حساب مؤشرات الجسم</a>
+        <a href="food_calculator.html">حاسبة السعرات في الطعام</a>
+        <a href="macro_calculator.html">حاسبة البروتين والكربوهيدرات والدهون</a>
+        <a href="diet_tracker.html">تتبع نظامك الغذائي</a>
+        <a href="weight.html">تتبع الوزن</a>
+        <a href="diet.html">نظام غذائي</a>
+        <a href="exercises.html">تمارين</a>
+        `;
+        if (isAdmin) {
+            links += '<a href="admin.html">الادارة</a>';
+        }
+        navLinks.innerHTML = links;
+
+        fetch('http://127.0.0.1:5000/diet/weight_loss')
+            .then(response => response.json())
+            .then(data => populateTable(data, 'weightLossTable', isAdmin));
+
+        fetch('http://127.0.0.1:5000/diet/weight_gain')
+            .then(response => response.json())
+            .then(data => populateTable(data, 'weightGainTable', isAdmin));
+
+        fetch('http://127.0.0.1:5000/diet/muscle_cutting')
+            .then(response => response.json())
+            .then(data => populateTable(data, 'muscleCuttingTable', isAdmin));
+
+        fetch('http://127.0.0.1:5000/diet/muscle_bulking')
+            .then(response => response.json())
+            .then(data => populateTable(data, 'muscleBulkingTable', isAdmin));
+    });
+    </script>
+</body>
+</html>

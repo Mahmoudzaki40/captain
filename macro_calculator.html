@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة مؤشرات الجسم</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 800px; margin: auto; padding: 20px; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 10px; margin-top: 20px; }
+        header { background: #4CAF50; color: #fff; padding: 10px 20px; text-align: center; border-radius: 10px 10px 0 0; }
+        nav { display: flex; justify-content: space-around; padding: 10px; background: #333; color: #fff; }
+        nav a { color: #fff; text-decoration: none; padding: 10px; }
+        nav a:hover { background: #4CAF50; }
+        h1 { margin-bottom: 20px; }
+        label, input, select, button { display: block; width: 100%; margin-top: 10px; }
+        input, select, button { padding: 10px; margin-bottom: 10px; }
+        button { background-color: #4CAF50; color: #fff; border: none; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        .info { margin-top: 20px; padding: 10px; background: #e7f7e7; border: 1px solid #c3e6c3; border-radius: 5px; }
+        .result { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <header><h1>حاسبة مؤشرات الجسم</h1></header>
+    <nav>
+        <a href="main.html">حساب مؤشرات الجسم</a>
+        <a href="food_calculator.html">حاسبة السعرات في الطعام</a>
+        <a href="macro_calculator.html">حاسبة البروتين والكربوهيدرات والدهون</a>
+        <a href="diet_tracker.html">تتبع نظامك الغذائي</a>
+        <a href="weight.html">تتبع الوزن</a>
+        <a href="exercises.html">تمارين</a>
+        <a href="admin.html">الادارة </a>
+
+    </nav>
+    <div class="container">
+        <label for="weight">الوزن (بالكيلوجرام):</label>
+        <input type="number" id="weight" placeholder="أدخل وزنك" required>
+        
+        <label for="height">الطول (بالسنتيمتر):</label>
+        <input type="number" id="height" placeholder="أدخل طولك" required>
+
+        <label for="activityLevel">مستوى النشاط:</label>
+        <select id="activityLevel">
+            <option value="sedentary">غير نشط</option>
+            <option value="light">نشاط خفيف</option>
+            <option value="moderate">نشاط معتدل</option>
+            <option value="active">نشاط عالي</option>
+        </select>
+        
+        <label for="goal">الهدف:</label>
+        <select id="goal">
+            <option value="maintain">الحفاظ على الوزن</option>
+            <option value="lose">خسارة الوزن</option>
+            <option value="gain">زيادة الوزن</option>
+        </select>
+        
+        <button onclick="calculateNeeds()">احسب</button>
+        
+        <div class="result" id="result"></div>
+        <div class="info" id="info"></div>
+    </div>
+
+    <script>
+        function calculateNeeds() {
+            var weight = parseFloat(document.getElementById('weight').value);
+            var height = parseFloat(document.getElementById('height').value);
+            var activityLevel = document.getElementById('activityLevel').value;
+            var goal = document.getElementById('goal').value;
+
+            if (weight <= 0 || height <= 0) {
+                alert("يرجى إدخال وزن وطول صحيحين");
+                return;
+            }
+
+            // القيم الأساسية
+            var proteinFactorLow = 1.2, proteinFactorHigh = 1.6;
+            var carbFactorLow = 2, carbFactorHigh = 4;
+            var fatFactorLow = 0.5, fatFactorHigh = 0.8;
+
+            // تعديل القيم بناءً على الهدف
+            if (goal === "lose") {
+                proteinFactorLow = 1.2;
+                proteinFactorHigh = 1.6;
+                carbFactorLow = 2;
+                carbFactorHigh = 3;
+                fatFactorLow = 0.5;
+                fatFactorHigh = 0.7;
+            } else if (goal === "gain") {
+                proteinFactorLow = 1.5;
+                proteinFactorHigh = 2.0;
+                carbFactorLow = 4;
+                carbFactorHigh = 6;
+                fatFactorLow = 0.8;
+                fatFactorHigh = 1.0;
+            }
+
+            // حساب الاحتياجات
+            var proteinLow = weight * proteinFactorLow;
+            var proteinHigh = weight * proteinFactorHigh;
+            var carbsLow = weight * carbFactorLow;
+            var carbsHigh = weight * carbFactorHigh;
+            var fatLow = weight * fatFactorLow;
+            var fatHigh = weight * fatFactorHigh;
+
+            // حساب السعرات الحرارية
+            var proteinCaloriesLow = proteinLow * 4;
+            var proteinCaloriesHigh = proteinHigh * 4;
+            var carbCaloriesLow = carbsLow * 4;
+            var carbCaloriesHigh = carbsHigh * 4;
+            var fatCaloriesLow = fatLow * 9;
+            var fatCaloriesHigh = fatHigh * 9;
+
+            // حساب إجمالي السعرات الحرارية
+            var totalCaloriesLow = proteinCaloriesLow + carbCaloriesLow + fatCaloriesLow;
+            var totalCaloriesHigh = proteinCaloriesHigh + carbCaloriesHigh + fatCaloriesHigh;
+
+            // عرض النتائج
+            document.getElementById('result').innerHTML = `
+                <p>احتياجات البروتين: ${proteinLow.toFixed(1)} - ${proteinHigh.toFixed(1)} جرام يوميًا (${proteinCaloriesLow.toFixed(1)} - ${proteinCaloriesHigh.toFixed(1)} سعر حراري)</p>
+                <p>احتياجات الكربوهيدرات: ${carbsLow.toFixed(1)} - ${carbsHigh.toFixed(1)} جرام يوميًا (${carbCaloriesLow.toFixed(1)} - ${carbCaloriesHigh.toFixed(1)} سعر حراري)</p>
+                <p>احتياجات الدهون: ${fatLow.toFixed(1)} - ${fatHigh.toFixed(1)} جرام يوميًا (${fatCaloriesLow.toFixed(1)} - ${fatCaloriesHigh.toFixed(1)} سعر حراري)</p>
+                <p>إجمالي السعرات الحرارية المطلوبة يوميًا: ${totalCaloriesLow.toFixed(1)} - ${totalCaloriesHigh.toFixed(1)} سعر حراري</p>
+            `;
+
+            // عرض التوصيات
+            document.getElementById('info').innerHTML = `
+                <p>نصائح:</p>
+                <p>للحصول على البروتين، يمكن تناول اللحوم، الدواجن، الأسماك، البيض، ومنتجات الألبان.</p>
+                <p>للحصول على الكربوهيدرات، يمكن تناول الحبوب الكاملة، الخضروات، الفواكه، والبقوليات.</p>
+                <p>للحصول على الدهون الصحية، يمكن تناول المكسرات، البذور، الأفوكادو، والزيوت النباتية.</p>
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تتبع الوزن والتقدم</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        header {
+            background: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        nav {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            background: #333;
+            color: #fff;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px;
+        }
+        nav a:hover {
+            background: #4CAF50;
+        }
+        h1, h2 {
+            margin-bottom: 20px;
+        }
+        label, input, button {
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: #fff;
+        }
+        canvas {
+            padding: 20px;
+            background: #fff;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>تتبع الوزن والتقدم</h1>
+    </header>
+    <nav>
+        <a href="main.html">حساب مؤشرات الجسم</a>
+        <a href="food_calculator.html">حاسبة السعرات في الطعام</a>
+        <a href="macro_calculator.html">حاسبة البروتين والكربوهيدرات والدهون</a>
+        <a href="diet_tracker.html">تتبع نظامك الغذائي</a>
+        <a href="weight.html">تتبع الوزن</a>
+        <a href="diet.html">نظام غذائي </a>
+        <a href="exercises.html">تمارين</a>
+
+    </nav>
+    <div class="container">
+        <form id="weightForm">
+            <label for="newUserId">تسجيل معرف جديد:</label>
+            <input type="text" id="newUserId" placeholder="أدخل معرف جديد" required>
+            <button type="button" onclick="registerUserId()">تسجيل معرف</button>
+            
+            <label for="userId">معرف المستخدم:</label>
+            <input type="text" id="userId" placeholder="أدخل معرف المستخدم" required>
+            <button type="button" onclick="loadUserData()">تحميل البيانات</button>
+            
+            <label for="weightEntry">أدخل وزنك الحالي (بالكيلوجرام):</label>
+            <input type="number" id="weightEntry" placeholder="أدخل وزنك هنا" required>
+            <button type="button" onclick="addWeight()">إضافة وزن</button>
+            
+        </form>
+        <div id="weightDisplay">
+            <h2>سجل الوزن:</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>الوزن (كغ)</th>
+                    </tr>
+                </thead>
+                <tbody id="weightList"></tbody>
+            </table>
+        </div>
+        <canvas id="weightChart" width="400" height="200"></canvas>
+    </div>
+
+    <script>
+        function registerUserId() {
+            const newUserId = document.getElementById("newUserId").value;
+            if (newUserId) {
+                if (localStorage.getItem(newUserId)) {
+                    alert("هذا المعرف مسجل بالفعل. الرجاء استخدام معرف آخر.");
+                } else {
+                    localStorage.setItem(newUserId, JSON.stringify([])); // Initialize empty weight record
+                    alert("تم تسجيل المعرف بنجاح!");
+                    document.getElementById("newUserId").value = ''; // Clear input after registration
+                }
+            } else {
+                alert("الرجاء إدخال معرف.");
+            }
+        }
+
+        function loadUserData() {
+            const userId = document.getElementById("userId").value;
+            if (userId) {
+                if (!localStorage.getItem(userId)) {
+                    alert("هذا المعرف غير مسجل. الرجاء تسجيل المعرف أولا.");
+                    return;
+                }
+                updateWeightList(userId);
+            }
+        }
+
+        function addWeight() {
+            const userId = document.getElementById("userId").value;
+            const weight = document.getElementById("weightEntry").value;
+            const date = new Date().toLocaleDateString("en-US");
+
+            if (userId && weight) {
+                const userData = JSON.parse(localStorage.getItem(userId)) || [];
+                userData.push({ date, weight });
+                localStorage.setItem(userId, JSON.stringify(userData));
+                updateWeightList(userId);
+                document.getElementById("weightEntry").value = ''; // Clear input after adding
+            } else {
+                alert("يرجى التأكد من إدخال المعرف والوزن بشكل صحيح.");
+            }
+        }
+
+        function updateWeightList(userId) {
+            const userData = JSON.parse(localStorage.getItem(userId)) || [];
+            const list = document.getElementById("weightList");
+            list.innerHTML = ''; // Clear existing entries
+
+            let initialWeight = 0;
+            let finalWeight = 0;
+            const labels = [];
+            const data = [];
+
+            if (userData.length > 0) {
+                initialWeight = parseFloat(userData[0].weight);
+                finalWeight = parseFloat(userData[userData.length - 1].weight);
+            }
+
+            userData.forEach(record => {
+                labels.push(record.date);
+                data.push(record.weight);
+                const row = `<tr><td>${record.date}</td><td>${record.weight} كغ</td></tr>`;
+                list.innerHTML += row;
+            });
+
+            // Calculate the weight difference
+            const weightDifference = finalWeight - initialWeight;
+            const differenceText = weightDifference > 0 ? `زيادة: ${weightDifference.toFixed(2)} كغ` : `خسارة: ${Math.abs(weightDifference).toFixed(2)} كغ`;
+
+            // Add the total difference to the table
+            const resultRow = `<tr><td colspan="2" style="text-align:center; color: ${weightDifference > 0 ? 'red' : 'green'}"><strong>${differenceText}</strong></td></tr>`;
+            list.innerHTML += resultRow;
+
+            // Update the chart
+            const ctx = document.getElementById('weightChart').getContext('2d');
+            const weightChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'وزن بالكيلوغرام',
+                        data: data,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

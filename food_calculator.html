@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة السعرات في الطعام</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        header {
+            background: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        nav {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            background: #333;
+            color: #fff;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px;
+        }
+        nav a:hover {
+            background: #4CAF50;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        label, input, select, button {
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+        }
+        input, select, button {
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #suggestions {
+            margin-top: 5px;
+            border: 1px solid #ccc;
+        }
+        .suggestion-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>حاسبة السعرات في الطعام</h1>
+    </header>
+    <nav>
+        <a href="main.html">حساب مؤشرات الجسم</a>
+        <a href="food_calculator.html">حاسبة السعرات في الطعام</a>
+        <a href="macro_calculator.html">حاسبة البروتين والكربوهيدرات والدهون</a>
+        <a href="diet_tracker.html">تتبع نظامك الغذائي</a>
+        <a href="weight.html">تتبع الوزن</a>
+        <a href="diet.html">نظام غذائي </a>
+        <a href="exercises.html">تمارين</a>
+
+
+    </nav>
+    <div class="container">
+        <form>
+            <label for="foodSearch">اسم الطعام:</label>
+            <input type="text" id="foodSearch" placeholder="أدخل اسم الطعام" oninput="showSuggestions(this.value)">
+
+            <div id="suggestions"></div>
+
+            <label for="quantity">الكمية:</label>
+            <input type="number" id="quantity" placeholder="أدخل الكمية">
+
+            <label for="unit">وحدة القياس:</label>
+            <select id="unit">
+                <option value="gram">جرام</option>
+                <option value="piece">حبة</option>
+                <option value="kilogram">كيلوجرام</option>
+            </select>
+
+            <button type="button" onclick="calculateFood()">احسب</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <script src="foodData.js"></script>
+    <script>
+        function showSuggestions(value) {
+            var suggestions = document.getElementById("suggestions");
+            suggestions.innerHTML = '';
+            if (value.length > 0) {
+                var filtered = foods.filter(food => food.name.includes(value));
+                filtered.forEach(function(food) {
+                    var div = document.createElement("div");
+                    div.innerHTML = food.name;
+                    div.className = 'suggestion-item';
+                    div.onclick = function() {
+                        document.getElementById('foodSearch').value = food.name;
+                        suggestions.innerHTML = '';
+                    };
+                    suggestions.appendChild(div);
+                });
+            }
+        }
+
+        function calculateFood() {
+            var foodInput = document.getElementById("foodSearch").value;
+            var quantity = parseFloat(document.getElementById("quantity").value);
+            var unit = document.getElementById("unit").value;
+
+            var found = foods.find(food => food.name === foodInput);
+            if (found) {
+                var multiplier = 1; // بداية بمعامل تحويل قياسي لا يغير القيم
+                if (unit === "kilogram") {
+                    multiplier = 10; // 1000 جرام / 100 جرام لكل 100 جرام
+                } else if (unit === "gram") {
+                    multiplier = quantity / 100; // تحويل الجرام إلى قاعدة 100 جرام
+                } else if (unit === "piece" && found.quantity !== "جرام") {
+                    multiplier = quantity; // تعداد القطع إذا كانت الوحدة بالقطعة
+                }
+
+                var totalCalories = found.calories * multiplier;
+                var totalProteins = found.protein * multiplier;
+                var totalCarbs = found.carbs * multiplier;
+                var totalFat = found.fat * multiplier;
+
+                document.getElementById("result").innerHTML = "<h2>نتائج الطعام:</h2>" +
+                    "<table>" +
+                    "<tr><th>سعرات حرارية</th><td>" + totalCalories.toFixed(2) + "</td></tr>" +
+                    "<tr><th>بروتينات (غرام)</th><td>" + totalProteins.toFixed(2) + "</td></tr>" +
+                    "<tr><th>كاربوهيدرات (غرام)</th><td>" + totalCarbs.toFixed(2) + "</td></tr>" +
+                    "<tr><th>دهون (غرام)</th><td>" + totalFat.toFixed(2) + "</td></tr>" +
+                    "</table>";
+            } else {
+                document.getElementById("result").innerHTML = "الطعام غير موجود في قاعدة البيانات.";
+            }
+        }
+    </script>
+</body>
+</html>

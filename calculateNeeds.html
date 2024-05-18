@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حساب احتياجات البروتين والكربوهيدرات والدهون</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        input {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>حساب احتياجات البروتين والكربوهيدرات والدهون</h1>
+    <label for="weight">الوزن (بالكيلوجرام):</label>
+    <input type="number" id="weight" placeholder="أدخل وزنك" required>
+    
+    <label for="activityLevel">مستوى النشاط:</label>
+    <select id="activityLevel">
+        <option value="sedentary">غير نشط</option>
+        <option value="light">نشاط خفيف</option>
+        <option value="moderate">نشاط معتدل</option>
+        <option value="active">نشاط عالي</option>
+    </select>
+    
+    <button onclick="calculateNeeds()">احسب</button>
+    
+    <div class="result" id="result"></div>
+
+    <script>
+        function calculateNeeds() {
+            var weight = document.getElementById('weight').value;
+            var activityLevel = document.getElementById('activityLevel').value;
+
+            if (weight <= 0) {
+                alert("يرجى إدخال وزن صحيح");
+                return;
+            }
+
+            // احتياجات البروتين (1.2 إلى 2.2 جرام لكل كجم من وزن الجسم)
+            var proteinLow = weight * 1.2;
+            var proteinHigh = weight * 2.2;
+
+            // احتياجات الكربوهيدرات (3 إلى 7 جرام لكل كجم من وزن الجسم اعتمادًا على مستوى النشاط)
+            var carbFactor;
+            if (activityLevel === "sedentary") {
+                carbFactor = 3;
+            } else if (activityLevel === "light") {
+                carbFactor = 4;
+            } else if (activityLevel === "moderate") {
+                carbFactor = 5;
+            } else if (activityLevel === "active") {
+                carbFactor = 7;
+            }
+            var carbs = weight * carbFactor;
+
+            // احتياجات الدهون (0.8 إلى 1 جرام لكل كجم من وزن الجسم)
+            var fatLow = weight * 0.8;
+            var fatHigh = weight * 1.0;
+
+            // عرض النتائج
+            document.getElementById('result').innerHTML = `
+                <p>احتياجات البروتين: ${proteinLow.toFixed(1)} - ${proteinHigh.toFixed(1)} جرام يوميًا</p>
+                <p>احتياجات الكربوهيدرات: ${carbs.toFixed(1)} جرام يوميًا</p>
+                <p>احتياجات الدهون: ${fatLow.toFixed(1)} - ${fatHigh.toFixed(1)} جرام يوميًا</p>
+            `;
+        }
+    </script>
+</body>
+</html>

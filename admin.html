@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المستخدمين</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .container { max-width: 800px; margin: auto; padding: 20px; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 10px; margin-top: 20px; }
+        header { background: #4CAF50; color: #fff; padding: 10px 20px; text-align: center; border-radius: 10px 10px 0 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #4CAF50; color: #fff; }
+        button { background-color: #4CAF50; color: #fff; border: none; padding: 10px; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        form { margin-top: 20px; }
+        label, input, select { display: block; margin-top: 10px; width: 100%; padding: 10px; }
+        .nav-links { text-align: center; margin-top: 20px; }
+        .nav-links a { margin: 0 10px; text-decoration: none; color: #4CAF50; font-weight: bold; }
+        .nav-links a:hover { color: #45a049; }
+    </style>
+</head>
+<body>
+    <header><h1>إدارة المستخدمين</h1></header>
+    <div class="nav-links">
+        <a href="main.html">حساب مؤشرات الجسم</a>
+        <a href="food_calculator.html">حاسبة السعرات في الطعام</a>
+        <a href="macro_calculator.html">حاسبة البروتين والكربوهيدرات والدهون</a>
+        <a href="diet_tracker.html">تتبع نظامك الغذائي</a>
+        <a href="weight.html">تتبع الوزن</a>
+        <a href="diet.html">نظام غذائي</a>
+        <a href="exercises.html">تمارين</a>
+    </div>
+    <div class="container">
+        <table>
+            <thead>
+                <tr>
+                    <th>اسم المستخدم</th>
+                    <th>الدور</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody id="userTable">
+                <!-- سيتم إضافة المستخدمين هنا بواسطة JavaScript -->
+            </tbody>
+        </table>
+
+        <form id="registerForm">
+            <h2>تسجيل مستخدم جديد</h2>
+            <label for="username">اسم المستخدم:</label>
+            <input type="text" id="username" required>
+            
+            <label for="password">كلمة المرور:</label>
+            <input type="password" id="password" required>
+            
+            <label for="role">الدور:</label>
+            <select id="role" required>
+                <option value="user">مستخدم عادي</option>
+                <option value="admin">مسئول</option>
+            </select>
+            
+            <button type="button" onclick="registerUser()">تسجيل</button>
+        </form>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var role = localStorage.getItem('role');
+        if (role !== 'admin') {
+            alert('غير مصرح لك بالوصول إلى هذه الصفحة');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        fetch('http://127.0.0.1:5000/users')
+            .then(response => response.json())
+            .then(users => {
+                var userTable = document.getElementById('userTable');
+                users.forEach(user => {
+                    var row = document.createElement('tr');
+                    row.innerHTML = `<td>${user.username}</td><td>${user.role}</td><td><button onclick="deleteUser('${user.username}')">حذف</button></td>`;
+                    userTable.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    });
+
+    function deleteUser(username) {
+        fetch(`http://127.0.0.1:5000/delete_user/${username}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('تم حذف المستخدم بنجاح');
+                location.reload();
+            } else {
+                alert('حدث خطأ أثناء الحذف');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function registerUser() {
+        var username = document.getElementById('username').value;
+        var password = document.getElementById('password').value;
+        var role = document.getElementById('role').value;
+
+        fetch('http://127.0.0.1:5000/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: username, password: password, role: role })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message === "User registered successfully") {
+                alert('تم تسجيل المستخدم بنجاح');
+                location.reload();
+            } else {
+                alert('حدث خطأ أثناء التسجيل');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+    </script>
+</body>
+</html>
